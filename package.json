@@ -1,6 +1,6 @@
 {
   "name": "nbp-adapter-fb-messenger",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Facebook Messenger adapter for Node.js Bot Platform",
   "main": "dist/index.js",
   "scripts": {
