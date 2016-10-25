@@ -3,6 +3,25 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.messengerTunneling = exports.rulesWrapper = undefined;
+
+var _rulesWrapper = require('./rules-wrapper');
+
+Object.defineProperty(exports, 'rulesWrapper', {
+    enumerable: true,
+    get: function get() {
+        return _interopRequireDefault(_rulesWrapper).default;
+    }
+});
+
+var _tunneling = require('./tunneling');
+
+Object.defineProperty(exports, 'messengerTunneling', {
+    enumerable: true,
+    get: function get() {
+        return _interopRequireDefault(_tunneling).default;
+    }
+});
 
 exports.default = function (_ref) {
     var _ref$logger = _ref.logger;
@@ -14,77 +33,28 @@ exports.default = function (_ref) {
     }
 
     return function (recipientId) {
-        return function () {
-            return {
-                send: function send(text) {
-                    return new Promise(function (resolve, reject) {
-                        return _superagent2.default.post('https://graph.facebook.com/v2.6/me/messages?access_token=' + accessToken).send({
-                            recipient: { id: recipientId },
-                            message: { text: text }
-                        }).use(function (req) {
-                            logger.info('Request  -->', (0, _pick2.default)(req, LOG_REQUEST_FIELDS));
-                            return req;
-                        }).then(function (result) {
-                            if (result.status === _httpStatus.OK) {
-                                logger.info('Response <--', result.body);
-                            } else {
-                                logger.error(result.error);
-                            }
+        var performMessage = message.bind(null, accessToken, recipientId, logger);
 
-                            resolve(result);
-                        }, function (err) {
-                            logger.error(err);
-                            reject(err);
-                        });
-                    });
-                },
+        return {
+            send: function send(text) {
+                return performMessage({
+                    message: {
+                        text: text
+                    }
+                });
+            },
 
-                typing: function typing() {
-                    return new Promise(function (resolve, reject) {
-                        return _superagent2.default.post('https://graph.facebook.com/v2.6/me/messages?access_token=' + accessToken).send({
-                            recipient: { id: recipientId },
-                            sender_action: 'typing_on'
-                        }).use(function (req) {
-                            logger.info('Request  -->', (0, _pick2.default)(req, LOG_REQUEST_FIELDS));
-                            return req;
-                        }).then(function (result) {
-                            if (result.status === _httpStatus.OK) {
-                                logger.info('Response <--', result.body);
-                            } else {
-                                logger.error(result.error);
-                            }
+            typing: function typing() {
+                return performMessage({
+                    sender_action: 'typing_on'
+                });
+            },
 
-                            resolve(result);
-                        }, function (err) {
-                            logger.error(err);
-                            reject(err);
-                        });
-                    });
-                },
-
-                seen: function seen() {
-                    return new Promise(function (resolve, reject) {
-                        return _superagent2.default.post('https://graph.facebook.com/v2.6/me/messages?access_token=' + accessToken).send({
-                            recipient: { id: recipientId },
-                            sender_action: 'mark_seen'
-                        }).use(function (req) {
-                            logger.info('Request  -->', (0, _pick2.default)(req, LOG_REQUEST_FIELDS));
-                            return req;
-                        }).then(function (result) {
-                            if (result.status === _httpStatus.OK) {
-                                logger.info('Response <--', result.body);
-                            } else {
-                                logger.error(result.error);
-                            }
-
-                            resolve(result);
-                        }, function (err) {
-                            logger.error(err);
-                            reject(err);
-                        });
-                    });
-                }
-            };
+            seen: function seen() {
+                return performMessage({
+                    sender_action: 'mark_seen'
+                });
+            }
         };
     };
 };
@@ -106,3 +76,25 @@ var _httpStatus = require('http-status');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var LOG_REQUEST_FIELDS = ['method', 'url', '_data', 'header'];
+
+var message = function message(accessToken, recipientId, logger, messageObject) {
+    return new Promise(function (resolve, reject) {
+        return _superagent2.default.post('https://graph.facebook.com/v2.6/me/messages?access_token=' + accessToken).send(Object.assign({}, {
+            recipient: { id: recipientId }
+        }, messageObject)).use(function (req) {
+            logger.info('Request  -->', (0, _pick2.default)(req, LOG_REQUEST_FIELDS));
+            return req;
+        }).then(function (result) {
+            if (result.status === _httpStatus.OK) {
+                logger.info('Response <--', result.body);
+            } else {
+                logger.error(result.error);
+            }
+
+            resolve(result);
+        }, function (err) {
+            logger.error(err);
+            reject(err);
+        });
+    });
+};
