@@ -3,7 +3,16 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.messengerTunneling = exports.rulesWrapper = undefined;
+exports.messengerTunneling = exports.rulesWrapper = exports.CONTENT_TYPES = undefined;
+
+var _constants = require('./constants');
+
+Object.defineProperty(exports, 'CONTENT_TYPES', {
+    enumerable: true,
+    get: function get() {
+        return _constants.CONTENT_TYPES;
+    }
+});
 
 var _rulesWrapper = require('./rules-wrapper');
 
@@ -54,6 +63,111 @@ exports.default = function (_ref) {
                 return performMessage({
                     sender_action: 'mark_seen'
                 });
+            },
+
+            quickReplies: function quickReplies(text, list) {
+                return performMessage({
+                    message: {
+                        text: text,
+                        quick_replies: normalizeQuickReplies(list)
+                    }
+                });
+            },
+
+            button: function button(text, buttons) {
+                return performMessage({
+                    message: {
+                        attachment: {
+                            type: 'template',
+                            payload: {
+                                text: text,
+                                template_type: 'button',
+                                buttons: buttons
+                            }
+                        }
+                    }
+                });
+            },
+
+            generic: function generic(elements) {
+                return performMessage({
+                    message: {
+                        attachment: {
+                            type: 'template',
+                            payload: {
+                                template_type: 'generic',
+                                elements: elements
+                            }
+                        }
+                    }
+                });
+            },
+
+            buttons: function buttons(_buttons) {
+                return performMessage({
+                    message: {
+                        attachment: {
+                            type: 'template',
+                            payload: {
+                                template_type: 'generic',
+                                elements: _buttons
+                            }
+                        }
+                    }
+                });
+            },
+
+            list: function list(_list, buttons) {
+                return performMessage({
+                    message: {
+                        attachment: {
+                            type: 'template',
+                            payload: {
+                                template_type: 'list',
+                                top_element_style: 'compact',
+                                elements: _list,
+                                buttons: buttons
+                            }
+                        }
+                    }
+                });
+            },
+
+            image: function image(url) {
+                return performMessage({
+                    message: {
+                        attachment: {
+                            type: 'image',
+                            payload: {
+                                url: url
+                            }
+                        }
+                    }
+                });
+            },
+
+            receipt: function receipt(_ref2) {
+                var order = _ref2.order;
+                var items = _ref2.items;
+                var address = _ref2.address;
+                var summary = _ref2.summary;
+                var _ref2$adjustments = _ref2.adjustments;
+                var adjustments = _ref2$adjustments === undefined ? [] : _ref2$adjustments;
+
+                return performMessage({
+                    message: {
+                        attachment: {
+                            type: 'template',
+                            payload: Object.assign({}, order, {
+                                template_type: 'receipt',
+                                elements: items,
+                                address: address,
+                                summary: summary,
+                                adjustments: adjustments
+                            })
+                        }
+                    }
+                });
             }
         };
     };
@@ -73,13 +187,17 @@ var _superagent2 = _interopRequireDefault(_superagent);
 
 var _httpStatus = require('http-status');
 
+var _humps = require('humps');
+
+var _humps2 = _interopRequireDefault(_humps);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var LOG_REQUEST_FIELDS = ['method', 'url', '_data', 'header'];
 
 var message = function message(accessToken, recipientId, logger, messageObject) {
     return new Promise(function (resolve, reject) {
-        return _superagent2.default.post('https://graph.facebook.com/v2.6/me/messages?access_token=' + accessToken).send(Object.assign({}, {
+        return _superagent2.default.post('https://graph.facebook.com/me/messages?access_token=' + accessToken).send(Object.assign({}, {
             recipient: { id: recipientId }
         }, messageObject)).use(function (req) {
             logger.info('Request  -->', (0, _pick2.default)(req, LOG_REQUEST_FIELDS));
@@ -87,14 +205,24 @@ var message = function message(accessToken, recipientId, logger, messageObject) 
         }).then(function (result) {
             if (result.status === _httpStatus.OK) {
                 logger.info('Response <--', result.body);
+                return resolve(result);
             } else {
+                return reject(err);
                 logger.error(result.error);
             }
-
-            resolve(result);
-        }, function (err) {
-            logger.error(err);
-            reject(err);
+        }, function (error) {
+            logger.error(error.response.text);
+            reject(error);
         });
+    });
+};
+
+var normalizeQuickReplies = function normalizeQuickReplies(list) {
+    return list.map(function (item) {
+        if (!item.contentType) {
+            throw new Error('Didn\'t specify required field \'contentType\' in facebook quick replies.');
+        }
+
+        return _humps2.default.decamelizeKeys(item);
     });
 };

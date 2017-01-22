@@ -1,6 +1,6 @@
 {
   "name": "nbp-adapter-fb-messenger",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Facebook Messenger adapter for Node.js Bot Platform",
   "main": "dist/index.js",
   "scripts": {
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/evilai/nbp-adapter-fb-messenger#readme",
   "dependencies": {
     "http-status": "^0.2.3",
+    "humps": "^2.0.0",
     "lodash": "^4.16.4",
     "superagent": "^2.3.0"
   },
