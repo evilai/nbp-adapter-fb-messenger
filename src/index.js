@@ -4,7 +4,7 @@ import request from 'superagent';
 import { OK } from 'http-status';
 import humps from 'humps';
 
-export { CONTENT_TYPES } from './constants';
+export { CONTENT_TYPES, COMMUNICATED_COUNT } from './constants';
 
 const LOG_REQUEST_FIELDS = ['method', 'url', '_data', 'header'];
 

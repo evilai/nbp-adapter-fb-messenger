@@ -4,6 +4,7 @@
  */
 
 import reduce from 'lodash/reduce';
+import { COMMUNICATED_COUNT } from './constants';
 const noop = function* () {
     return null;
 };
@@ -18,6 +19,9 @@ export default function(client) {
                 return acc;
             }, {});
         }
+
+        const count = rules.get(COMMUNICATED_COUNT) || 0;
+        rules.set({ [COMMUNICATED_COUNT]: count + 1 });
 
         return client;
     };

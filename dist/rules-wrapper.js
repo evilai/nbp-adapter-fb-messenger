@@ -13,6 +13,9 @@ exports.default = function (client) {
             }, {});
         }
 
+        var count = rules.get(_constants.COMMUNICATED_COUNT) || 0;
+        rules.set(_defineProperty({}, _constants.COMMUNICATED_COUNT, count + 1));
+
         return client;
     };
 };
@@ -21,7 +24,14 @@ var _reduce = require('lodash/reduce');
 
 var _reduce2 = _interopRequireDefault(_reduce);
 
+var _constants = require('./constants');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; } /**
+                                                                                                                                                                                                                   * If we should be silent, then don't try to communicate with user.
+                                                                                                                                                                                                                   * This wrapper returns noop functions for all client methods.
+                                                                                                                                                                                                                   */
 
 var noop = regeneratorRuntime.mark(function noop() {
     return regeneratorRuntime.wrap(function noop$(_context) {
@@ -36,9 +46,6 @@ var noop = regeneratorRuntime.mark(function noop() {
             }
         }
     }, noop, this);
-}); /**
-     * If we should be silent, then don't try to communicate with user.
-     * This wrapper returns noop functions for all client methods.
-     */
+});
 
 var SILENT_RULE = 'silent';

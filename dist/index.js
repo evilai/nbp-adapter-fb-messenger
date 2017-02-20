@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.messengerTunneling = exports.rulesWrapper = exports.CONTENT_TYPES = undefined;
+exports.messengerTunneling = exports.rulesWrapper = exports.COMMUNICATED_COUNT = exports.CONTENT_TYPES = undefined;
 
 var _constants = require('./constants');
 
@@ -11,6 +11,12 @@ Object.defineProperty(exports, 'CONTENT_TYPES', {
     enumerable: true,
     get: function get() {
         return _constants.CONTENT_TYPES;
+    }
+});
+Object.defineProperty(exports, 'COMMUNICATED_COUNT', {
+    enumerable: true,
+    get: function get() {
+        return _constants.COMMUNICATED_COUNT;
     }
 });
 
